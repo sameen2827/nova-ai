@@ -1,3 +1,8 @@
+ ## 🌐 Live Demo
+
+🚀 Try the project here:
+
+**https://nova-8bduo5ry5-sameenfatima907-1190s-projects.vercel.app/**
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
