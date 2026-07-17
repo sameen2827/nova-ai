@@ -6,7 +6,6 @@ import { Menu, RefreshCw, Sparkles } from "lucide-react";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import type { ChatThread, FileAttachment } from "@/types";
 
 type ChatMessagesProps = {
@@ -45,17 +44,28 @@ export function ChatMessages({
   accept,
 }: ChatMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const shouldAutoScrollRef = useRef(true);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (shouldAutoScrollRef.current) {
+      bottomRef.current?.scrollIntoView({ block: "end" });
+    }
   }, [thread?.messages, isGenerating]);
+
+  useEffect(() => {
+    shouldAutoScrollRef.current = true;
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ block: "end" });
+    });
+  }, [thread?.id]);
 
   const lastMessage = thread?.messages.at(-1);
   const isStreaming =
     isGenerating && lastMessage?.role === "assistant" && !lastMessage.content;
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 px-4">
         <div className="flex min-w-0 items-center gap-2">
           <Button
@@ -85,7 +95,17 @@ export function ChatMessages({
         )}
       </header>
 
-      <ScrollArea className="min-h-0 flex-1">
+      <div
+        ref={scrollRef}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        onScroll={() => {
+          const viewport = scrollRef.current;
+          if (!viewport) return;
+          const distanceFromBottom =
+            viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+          shouldAutoScrollRef.current = distanceFromBottom < 80;
+        }}
+      >
         {!thread || thread.messages.length === 0 ? (
           <EmptyState onSuggestionClick={onSuggestionClick} />
         ) : (
@@ -113,7 +133,7 @@ export function ChatMessages({
             <div ref={bottomRef} />
           </div>
         )}
-      </ScrollArea>
+      </div>
 
       <ChatInput
         value={inputValue}

@@ -5,15 +5,32 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-function createPrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
+function getConnectionString(): string {
+  const raw = process.env.DATABASE_URL?.trim();
 
-  if (!connectionString) {
-    throw new Error("DATABASE_URL is not configured");
+  if (!raw) {
+    throw new Error(
+      "DATABASE_URL is not configured. Add it in Vercel → Settings → Environment Variables.",
+    );
   }
 
-  const adapter = new PrismaNeon({ connectionString });
+  // Strip accidental wrapping quotes from copy-paste in Vercel dashboard
+  const connectionString = raw.replace(/^["']|["']$/g, "");
 
+  try {
+    new URL(connectionString);
+  } catch {
+    throw new Error(
+      "DATABASE_URL is invalid. Use your full Neon PostgreSQL connection string (postgresql://...).",
+    );
+  }
+
+  return connectionString;
+}
+
+function createPrismaClient(): PrismaClient {
+  const connectionString = getConnectionString();
+  const adapter = new PrismaNeon({ connectionString });
   return new PrismaClient({ adapter });
 }
 

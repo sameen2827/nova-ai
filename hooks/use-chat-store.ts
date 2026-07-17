@@ -26,7 +26,26 @@ export function useChatStore() {
       const data = (await res.json()) as {
         conversations: Parameters<typeof conversationToThread>[0][];
       };
-      setThreads(data.conversations.map(conversationToThread));
+      const loadedThreads = data.conversations.map(conversationToThread);
+      setThreads(loadedThreads);
+      setActiveThreadId((currentId) => {
+        if (
+          currentId &&
+          loadedThreads.some((thread) => thread.id === currentId)
+        ) {
+          return currentId;
+        }
+
+        const requestedId =
+          typeof window === "undefined"
+            ? null
+            : new URLSearchParams(window.location.search).get("conversation");
+
+        return requestedId &&
+          loadedThreads.some((thread) => thread.id === requestedId)
+          ? requestedId
+          : null;
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load");
     } finally {

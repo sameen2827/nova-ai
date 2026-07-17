@@ -77,7 +77,10 @@ export function ChatInterface() {
         onMobileClose={() => setMobileSidebarOpen(false)}
       />
 
-      <div id="chat-main" className="flex min-w-0 flex-1 flex-col">
+      <div
+        id="chat-main"
+        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+      >
         {error && (
           <div className="p-4">
             <ErrorMessage message={error} onRetry={reload} />

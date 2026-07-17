@@ -42,7 +42,7 @@ export function RecentChats({
         {conversations.map((thread) => (
           <Link
             key={thread.id}
-            href="/chat"
+            href={`/chat?conversation=${encodeURIComponent(thread.id)}`}
             className="flex items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-muted/60"
           >
             <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-500">
